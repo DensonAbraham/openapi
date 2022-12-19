@@ -1,0 +1,135 @@
+openapi: 3.0.0
+info:
+  description: This is an api for everything related to trains
+  version: "1.0.0"
+  title: Train API 
+  contact:
+    email: denson@train.com 
+servers:
+- url: https://{username}.gigantic-server.com:{port}/{basePath}
+  description: The production API server
+  variables:
+    username:
+      # note! no enum here means it is an open value
+      default: demo
+      description: this value is assigned by the service provider, in this example `gigantic-server.com`
+    port:
+      enum:
+        - '8443'
+        - '443'
+      default: '8443'
+    basePath:
+      # open meaning there is the opportunity to use special base paths as assigned by the provider, default is `v2`
+      default: v1
+tags:
+  - name: admins
+    description: API Calls for admins
+  - name: developers
+    description: API Calls for developers
+paths:
+  /update_train:
+    put:
+      tags:
+        - admins
+      summary: Edit Trains
+      operationId: /update_train
+      description: Edit Train details like name, start_station and destination
+      parameters:
+        - in: path
+          name: train_no
+          description: Train No. of the train 
+          required: true
+          schema:
+            type: string 
+      requestBody:
+        content: 
+          # image/png:
+          #   schema:
+          #     type: string
+          #     contentMediaType: image/png
+          #     contentEncoding: base64
+          application/json:
+            schema:
+              # $ref: '#/compounds/schemas/Train' 
+              $ref: '#/components/schemas/Train'
+          # description: Train Details to be updated
+      responses:
+        '200': 
+          description: Train Details updated
+        '400':
+          description: Invalid object
+  /get_train_data:
+    get: 
+      tags: 
+        - developers
+      summary: Get Train Info  
+      operationId: get_train_data 
+      description: Get Train Data for a train number
+      parameters:
+        - in: path
+          name: train_no
+          description: Train No. of the train 
+          required: true
+          schema:
+            type: string 
+      responses: 
+        '200':
+          description: A Train Object
+          content:
+            application/json:
+              schema:
+                # $ref: '#/compounds/schemas/Train' 
+                $ref: '#/components/schemas/Train_Response' 
+  /subscribe:
+    post:
+      tags: 
+        - developers
+      summary: Subscribe to a webhook to get updates on Train
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                callbackUrl:   # Callback URL
+                  type: string
+                  format: uri
+                  example: https://myserver.com/send/callback/here
+              required:
+                - callbackUrl
+      responses:
+        '201':
+          description: Webhook created
+
+        
+
+          
+components:
+  schemas:
+    Train:
+      properties: 
+        name:
+          type: string
+          example: KA express
+        start_station:
+          type: string 
+          example: Bangalore
+        destination: 
+          type: string 
+          example: Gondia 
+      
+    Train_Response:
+      properties: 
+        name:
+          type: string
+          example: KA express
+        start_station:
+          type: string 
+          example: Bangalore
+        destination: 
+          type: string 
+          example: Gondia
+        time: 
+          type: string 
+          example: 15:00
